@@ -14,6 +14,10 @@ app.use(express.static('public'));
 
 io.on('connection', (socket) => {
 
+  if(game.player_counter == 0) {
+    game.init();
+  }
+
   game.addPlayer(socket.id);
   io.emit("playerCount", Object.keys(game.players).length);
 
@@ -21,6 +25,10 @@ io.on('connection', (socket) => {
     game.addAction(socket.id, obj);
   });
 
+  socket.on('disconnect', function(){
+    game.removePlayer(socket.id);
+  });
+  
 });
 
 server.listen(port, () => {

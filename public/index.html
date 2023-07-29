@@ -33,7 +33,6 @@ class WelcomeScene extends Phaser.Scene {
 		this.playerText = this.add.text(200, 300, 'Players:', { fontSize: '32px', fill: '#fff' });
 		this.numberText = this.add.text(200, 400, String(player_count), { fontSize: '32px', fill: '#fff' });
 
-
 		this.welcomeText.setInteractive();
 
 	}    
@@ -44,8 +43,6 @@ class WelcomeScene extends Phaser.Scene {
 			this.welcomeText.on('pointerdown', () => {
 				game.scene.start('GameScene');})
 		}
-
-
 	}
 }
 
