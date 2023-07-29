@@ -24,4 +24,6 @@ server.listen(port, () => {
   const game = new Game();
   startLoop(game);
 
+  game.startGame();
+
 });

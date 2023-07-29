@@ -56,8 +56,8 @@
             const asset_name = 'tiles';
             const half_tile = tile_size/2;
 
-            for (let x = 0; x <screen_width / half_tile; x++) {
-                for (let y = 0; y < screen_height / half_tile; y++) {
+            for (let x = 0; x <screen_width / tile_size; x++) {
+                for (let y = 0; y < screen_height / tile_size; y++) {
                     addAsset(x, y, asset_name, scale, half_tile, half_tile)
                 }
             }
