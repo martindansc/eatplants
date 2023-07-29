@@ -103,6 +103,8 @@
             last_update_received = obj;
         });
 
+        socket.emit("add_action", {type: "moveBug", direction: "down"});
+
     </script>
 
 </body>
