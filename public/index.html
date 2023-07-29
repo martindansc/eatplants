@@ -90,19 +90,9 @@ class GameScene extends Phaser.Scene {
 		const tile = this.add.sprite(w_half + tile_size * x, h_half + tile_size * y, asset_name)
 		tile.setInteractive();
 		tile.setScale(scale);
-		if (asset_name.startsWith('bug')) {
-			tile.setScale(10*scale);
-			tile.on('pointerover', function (pointer){
-				this.setTint(0xff0000);
-			});
-			tile.on('pointerout', function (pointer){
-				this.clearTint();
-			});
-			tile.on('pointerdown', function (pointer){
-				// this.destroy();
-				socket.emit('add_action', {type: 'kill', pos_x: x, pos_y: y});
-			});
-		}
+		tile.on('pointerdown', function (pointer){
+			socket.emit('add_action', {type: 'kill', pos_x: x, pos_y: y});
+		});
 	}
 
 	update() {
