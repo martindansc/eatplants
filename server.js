@@ -8,12 +8,14 @@ const port = 8000;
 const { Game } = require("./lib/game");
 const { startLoop } = require("./lib/loop");
 
+const game = new Game();
+
 app.use(express.static('public'));
 
 io.on('connection', (socket) => {
 
-  socket.on('move_bug', (msg) => {
-    
+  socket.on('add_action', (obj) => {
+    game.addAction(socket.id, obj);
   });
 
 });
@@ -21,7 +23,6 @@ io.on('connection', (socket) => {
 server.listen(port, () => {
   console.log(`App listening on port ${port}`);
 
-  const game = new Game();
   startLoop(game, io);
 
   game.startGame();
