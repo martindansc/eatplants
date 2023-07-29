@@ -1,59 +1,84 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.15.1/dist/phaser-arcade-physics.min.js"></script>
 </head>
+
 <body>
 
     <script>
-    var config = {
-        type: Phaser.AUTO,
-        width: 800,
-        height: 600,
-        physics: {
-            default: 'arcade',
-            arcade: {
-                gravity: { y: 200 }
+        const screen_width = 1024;
+        const screen_height = 640;
+        const tile_size = 16;
+        const tile_scale = 0.065;
+
+        var config = {
+            type: Phaser.AUTO,
+            width: screen_width,
+            height: screen_height,
+            scene: {
+                preload: preload,
+                create: create
             }
-        },
-        scene: {
-            preload: preload,
-            create: create
+        };
+
+        var game = new Phaser.Game(config);
+        var self;
+
+        function preload() {
+            self = this;
+            this.load.image('tiles', 'assets/bg.png');
+            this.load.image('plant1','assets/plants/shadow/1.png')
+            this.load.image('plant2','assets/plants/shadow/2.png')
+            this.load.image('plant3','assets/plants/shadow/3.png')
+
         }
-    };
+        function getPlantScale(number_squares){
+            return tile_scale*number_squares
+        }
+        function create() {
+            addBackground(tile_scale);
+            addPlant(5,5,'plant1',5)
+            addPlant(15,25,'plant2',4)
+            addPlant(7,15,'plant3',10)
 
-    var game = new Phaser.Game(config);
 
-    function preload ()
-    {
-        this.load.setBaseURL('http://labs.phaser.io');
+        }
 
-        this.load.image('sky', 'assets/skies/space3.png');
-        this.load.image('logo', 'assets/sprites/phaser3-logo.png');
-        this.load.image('red', 'assets/particles/red.png');
-    }
+        function addPlant(x,y,asset_name,number_tiles){
+            scale = getPlantScale(number_tiles)
+            const [w_size, w_half, h_size, h_half] = getAssetSize(asset_name,scale);
+            addAsset(x, y, asset_name, scale, w_half, h_half)
 
-    function create ()
-    {
-        this.add.image(400, 300, 'sky');
+        }
+        function addBackground(scale) {
+            const asset_name = 'tiles';
+            const half_tile = tile_size/2;
 
-        var particles = this.add.particles('red');
+            for (let x = 0; x <screen_width / half_tile; x++) {
+                for (let y = 0; y < screen_height / half_tile; y++) {
+                    addAsset(x, y, asset_name, scale, half_tile, half_tile)
+                }
+            }
 
-        var emitter = particles.createEmitter({
-            speed: 100,
-            scale: { start: 1, end: 0 },
-            blendMode: 'ADD'
-        });
+        }
+        function getAssetSize(asset_name, scale) {
+            const width = self.textures.get(asset_name).getSourceImage().width
+            const height = self.textures.get(asset_name).getSourceImage().height
+            const w_size = width * scale
+            const w_half = w_size / 2
+            const h_size = height * scale
+            const h_half = h_size / 2
+            return [w_size, w_half, h_size, h_half]
+        }
+        function addAsset(x, y, asset_name, scale, w_half, h_half) {
+            const tile = self.add.image(w_half + tile_size * x, h_half + tile_size * y, asset_name);
+            tile.setScale(scale);
 
-        var logo = this.physics.add.image(400, 100, 'logo');
-
-        logo.setVelocity(100, 200);
-        logo.setBounce(1, 1);
-        logo.setCollideWorldBounds(true);
-
-        emitter.startFollow(logo);
-    }
+        }
     </script>
 
 </body>
+
 </html>
