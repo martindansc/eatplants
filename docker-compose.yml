@@ -1,0 +1,11 @@
+services:
+  nodejs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/home/node/app
+    working_dir: /home/node/app
+    command: npm run start

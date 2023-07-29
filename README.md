@@ -1,4 +1,9 @@
 # eatplants
 
-## How to run a simple http server with python
-python -m http.server
+## How to run
+
+    docker compose up
+
+or
+
+    node server.js
