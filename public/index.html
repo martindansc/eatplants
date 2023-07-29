@@ -1,154 +1,170 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-    <script src="/external/phaser.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
+	<head>
+		<script src="/external/phaser.min.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
 
-</head>
+	</head>
 
-<body>
+	<body>
 
-    <script>
-        const socket = io();
-        const screen_width = 1024;
-        const screen_height = 640;
-        const tile_size = 16;
-        const tile_scale = 0.065;
-        const gameStarted = false;
-        let last_update_received = {};
+		<script>
+			const socket = io();
+const screen_width = 1024;
+const screen_height = 640;
+const tile_size = 16;
+const tile_scale = 0.065;
+const gameStarted = false;
+let last_update_received = {};
 
-        class WelcomeScene extends Phaser.Scene {
-            constructor() {
-                super({ key: 'WelcomeScene' });
-            }
+class WelcomeScene extends Phaser.Scene {
+	constructor() {
+		super({ key: 'WelcomeScene' });
+	}
 
-            preload() {
-            }
+	preload() {
+	}
 
-            create() {
-                const welcomeText = this.add.text(200, 200, 'Click here to start!', { fontSize: '32px', fill: '#fff' });
+	create() {
+		const welcomeText = this.add.text(200, 200, 'Click here to start!', { fontSize: '32px', fill: '#fff' });
 
-                welcomeText.setInteractive();
+		welcomeText.setInteractive();
 
-                welcomeText.on('pointerdown', () => {
-                    game.scene.start('GameScene');
-                });
-            }
-        }
+		welcomeText.on('pointerdown', () => {
+			game.scene.start('GameScene');
+		});
+	}
+}
 
-        class GameScene extends Phaser.Scene {
-            constructor() {
-                super({ key: 'GameScene' });
-            }
-
-
-            preload() {
-                this.load.image('tiles', 'assets/bg.png');
-                this.load.image('plant1', 'assets/plants/shadow/1.png')
-                this.load.image('plant2', 'assets/plants/shadow/2.png')
-                this.load.image('plant3', 'assets/plants/shadow/3.png')
-                this.load.image('player','assets/plants/shadow/45.png')
-
-            }
-
-            getPlantScale(number_squares) {
-                return tile_scale * number_squares
-            }
-
-            create() {
-                this.addBackground(tile_scale);
-            }
-
-            addPlant(x, y, asset_name, number_tiles) {
-                const scale = this.getPlantScale(number_tiles)
-                const [w_size, w_half, h_size, h_half] = this.getAssetSize(asset_name, scale);
-                this.addAsset(x, y, asset_name, scale, w_half, h_half)
-
-            }
-            addBackground(scale) {
-                const asset_name = 'tiles';
-                const half_tile = tile_size / 2;
-
-                for (let x = 0; x < screen_width / tile_size; x++) {
-                    for (let y = 0; y < screen_height / tile_size; y++) {
-                        this.addAsset(x, y, asset_name, scale, half_tile, half_tile)
-                    }
-                }
-
-            }
-            getAssetSize(asset_name, scale) {
-                const width = this.textures.get(asset_name).getSourceImage().width
-                const height = this.textures.get(asset_name).getSourceImage().height
-                const w_size = width * scale
-                const w_half = w_size / 2
-                const h_size = height * scale
-                const h_half = h_size / 2
-                return [w_size, w_half, h_size, h_half]
-            }
-            addAsset(x, y, asset_name, scale, w_half, h_half) {
-                const tile = this.add.image(w_half + tile_size * x, h_half + tile_size * y, asset_name);
-                tile.setScale(scale);
-
-            }
-
-            update() {
-                if (!last_update_received) return;
-
-                const new_state = last_update_received;
-
-                for (const x in new_state.plants) {
-                    for (const y in new_state.plants[x]) {
-                        this.addPlant(x, y, new_state.plants[x][y].type, 2)
-                    }
-                }
-                for (const i in new_state.players){
-                    this.addPlant(new_state.players[i].pos_x,new_state.players[i].pos_y,"player",3)
-                }
-            }
-        }
-
-    socket.on('updateState', function (obj) {
-        last_update_received = obj;
-    });
-
-    const config = {
-        type: Phaser.AUTO,
-        width: screen_width,
-        height: screen_height,
-        scene: [WelcomeScene,GameScene]
-    };
-
-    var game = new Phaser.Game(config);
-    var self;
+class GameScene extends Phaser.Scene {
+	constructor() {
+		super({ key: 'GameScene' });
+	}
 
 
-        window.addEventListener('keydown', function (e) {
-            let direction = "none";
-            if(e.key == "w") {
-                direction = "up";
-            }
-            else if(e.key == "s") {
-                direction = "down";
-            }
-            else if(e.key == "a") {
-                direction = "left";
-            }
-            else if (e.key == "d") {
-                direction = "right";
-            }
-            else {
-                console.log(e.key);
-                return;
-            }
+	preload() {
+		this.load.image('tiles', 'assets/bg.png');
+		this.load.image('plant1', 'assets/plants/shadow/1.png')
+		this.load.image('plant2', 'assets/plants/shadow/2.png')
+		this.load.image('plant3', 'assets/plants/shadow/3.png')
+		this.load.image('bug1','assets/plants/shadow/45.png')
 
-            socket.emit("add_action", {type: "moveBug", direction});
+	}
 
-        }, false);
+	getPlantScale(number_squares) {
+		return tile_scale * number_squares
+	}
+
+	create() {
+		this.addBackground(tile_scale);
+	}
+
+	addPlant(x, y, asset_name, number_tiles) {
+		const scale = this.getPlantScale(number_tiles)
+		const [w_size, w_half, h_size, h_half] = this.getAssetSize(asset_name, scale);
+		this.addAsset(x, y, asset_name, scale, w_half, h_half)
+
+	}
+	addBackground(scale) {
+		const asset_name = 'tiles';
+		const half_tile = tile_size / 2;
+
+		for (let x = 0; x < screen_width / tile_size; x++) {
+			for (let y = 0; y < screen_height / tile_size; y++) {
+				this.addAsset(x, y, asset_name, scale, half_tile, half_tile)
+			}
+		}
+
+	}
+	getAssetSize(asset_name, scale) {
+		const width = this.textures.get(asset_name).getSourceImage().width
+		const height = this.textures.get(asset_name).getSourceImage().height
+		const w_size = width * scale
+		const w_half = w_size / 2
+		const h_size = height * scale
+		const h_half = h_size / 2
+		return [w_size, w_half, h_size, h_half]
+	}
+	addAsset(x, y, asset_name, scale, w_half, h_half) {
+		const tile = this.add.sprite(w_half + tile_size * x, h_half + tile_size * y, asset_name)
+		tile.setInteractive();
+		tile.setScale(scale);
+		if (asset_name.startsWith('bug')) {
+			tile.setScale(10*scale);
+			tile.on('pointerover', function (pointer){
+				this.setTint(0xff0000);
+			});
+			tile.on('pointerout', function (pointer){
+				this.clearTint();
+			});
+			tile.on('pointerdown', function (pointer){
+				// this.destroy();
+				socket.emit('add_action', {type: 'kill', pos_x: x, pos_y: y});
+			});
+		}
+	}
+
+	update() {
+		if (!last_update_received) return;
+
+		const new_state = last_update_received;
+
+		for (const x in new_state.plants) {
+			for (const y in new_state.plants[x]) {
+				this.addPlant(x, y, new_state.plants[x][y].type, 2)
+			}
+		}
+		
+		for (const i in new_state.players){
+			if(new_state.players[i].alive && new_state.players[i].role != 'hunter') {
+				this.addPlant(new_state.players[i].pos_x,new_state.players[i].pos_y,"bug1",3);
+			}
+		}
+	}
+}
+
+socket.on('updateState', function (obj) {
+	last_update_received = obj;
+});
+
+const config = {
+	type: Phaser.AUTO,
+	width: screen_width,
+	height: screen_height,
+	scene: [WelcomeScene,GameScene]
+};
+
+var game = new Phaser.Game(config);
+var self;
 
 
-    </script>
+window.addEventListener('keydown', function (e) {
+	let direction = "none";
+	if(e.key == "w") {
+		direction = "up";
+	}
+	else if(e.key == "s") {
+		direction = "down";
+	}
+	else if(e.key == "a") {
+		direction = "left";
+	}
+	else if (e.key == "d") {
+		direction = "right";
+	}
+	else {
+		console.log(e.key);
+		return;
+	}
 
-</body>
+	socket.emit("add_action", {type: "moveBug", direction});
+
+}, false);
+
+
+		</script>
+
+	</body>
 
 </html>
