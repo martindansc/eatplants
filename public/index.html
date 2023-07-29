@@ -10,18 +10,21 @@
 <body>
 
     <script>
+        const socket = io();
         const screen_width = 1024;
         const screen_height = 640;
         const tile_size = 16;
         const tile_scale = 0.065;
+        let last_update_received = {};
 
-        var config = {
+        const config = {
             type: Phaser.AUTO,
             width: screen_width,
             height: screen_height,
             scene: {
                 preload: preload,
-                create: create
+                create: create,
+                update:updateState,
             }
         };
 
@@ -43,9 +46,9 @@
         
         function create() {
             addBackground(tile_scale);
-            addPlant(5,5,'plant1',5)
-            addPlant(15,25,'plant2',4)
-            addPlant(7,15,'plant3',10)
+            // addPlant(5,5,'plant1',5)
+            // addPlant(15,25,'plant2',4)
+            // addPlant(7,15,'plant3',10)
         }
 
         function addPlant(x,y,asset_name,number_tiles){
@@ -80,12 +83,20 @@
 
         }
 
-        function updateState(new_state) {
+        function updateState() {
+            if(!last_update_received) return;
 
+            new_state = last_update_received;
+
+            for (x in new_state.plants){
+                for (y in new_state.plants[x]){
+                    addPlant(x,y,new_state.plants[x][y].type,2)
+                }
+            }
         }
-
+    
         socket.on('updateState', function(obj) {
-            console.log(obj);
+            last_update_received = obj;
         });
 
     </script>
