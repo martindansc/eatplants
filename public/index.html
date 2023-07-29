@@ -37,7 +37,7 @@
             this.load.image('plant1', 'assets/plants/shadow/1.png')
             this.load.image('plant2', 'assets/plants/shadow/2.png')
             this.load.image('plant3', 'assets/plants/shadow/3.png')
-            this.load.image('player1', 'assets/plants/shadow/45.png')
+            this.load.image('player', 'assets/plants/shadow/45.png')
 
         }
 
@@ -95,8 +95,7 @@
                 }
             }
             for (i in new_state.players) {
-
-                addPlant(new_state.players[i].pos_x, new_state.players[i].pos_y, "player1", 3)
+                addPlant(new_state.players[i].pos_x, new_state.players[i].pos_y, "player", 3)
             }
         }
 
