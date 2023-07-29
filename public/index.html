@@ -15,93 +15,117 @@
         const screen_height = 640;
         const tile_size = 16;
         const tile_scale = 0.065;
+        const gameStarted = false;
         let last_update_received = {};
 
-        const config = {
-            type: Phaser.AUTO,
-            width: screen_width,
-            height: screen_height,
-            scene: {
-                preload: preload,
-                create: create,
-                update: updateState,
+        class WelcomeScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'WelcomeScene' });
             }
-        };
 
-        var game = new Phaser.Game(config);
-        var self;
+            preload() {
+            }
 
-        function preload() {
-            self = this;
-            this.load.image('tiles', 'assets/bg.png');
-            this.load.image('plant1', 'assets/plants/shadow/1.png')
-            this.load.image('plant2', 'assets/plants/shadow/2.png')
-            this.load.image('plant3', 'assets/plants/shadow/3.png')
-            this.load.image('player', 'assets/plants/shadow/45.png')
+            create() {
+                const welcomeText = this.add.text(200, 200, 'Click here to start!', { fontSize: '32px', fill: '#fff' });
 
+                welcomeText.setInteractive();
+
+                welcomeText.on('pointerdown', () => {
+                    game.scene.start('GameScene');
+                });
+            }
         }
 
-        function getPlantScale(number_squares) {
-            return tile_scale * number_squares
-        }
+        class GameScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'GameScene' });
+            }
 
-        function create() {
-            addBackground(tile_scale);
-            // addPlant(5,5,'plant1',5)
-            // addPlant(15,25,'plant2',4)
-            // addPlant(7,15,'plant3',10)
-        }
 
-        function addPlant(x, y, asset_name, number_tiles) {
-            scale = getPlantScale(number_tiles)
-            const [w_size, w_half, h_size, h_half] = getAssetSize(asset_name, scale);
-            addAsset(x, y, asset_name, scale, w_half, h_half)
+            preload() {
+                this.load.image('tiles', 'assets/bg.png');
+                this.load.image('plant1', 'assets/plants/shadow/1.png')
+                this.load.image('plant2', 'assets/plants/shadow/2.png')
+                this.load.image('plant3', 'assets/plants/shadow/3.png')
 
-        }
-        function addBackground(scale) {
-            const asset_name = 'tiles';
-            const half_tile = tile_size / 2;
+            }
 
-            for (let x = 0; x < screen_width / tile_size; x++) {
-                for (let y = 0; y < screen_height / tile_size; y++) {
-                    addAsset(x, y, asset_name, scale, half_tile, half_tile)
+            getPlantScale(number_squares) {
+                return tile_scale * number_squares
+            }
+
+            create() {
+                this.addBackground(tile_scale);
+            }
+
+            addPlant(x, y, asset_name, number_tiles) {
+                const scale = this.getPlantScale(number_tiles)
+                const [w_size, w_half, h_size, h_half] = this.getAssetSize(asset_name, scale);
+                this.addAsset(x, y, asset_name, scale, w_half, h_half)
+
+            }
+            addBackground(scale) {
+                const asset_name = 'tiles';
+                const half_tile = tile_size / 2;
+
+                for (let x = 0; x < screen_width / tile_size; x++) {
+                    for (let y = 0; y < screen_height / tile_size; y++) {
+                        this.addAsset(x, y, asset_name, scale, half_tile, half_tile)
+                    }
+                }
+
+            }
+            getAssetSize(asset_name, scale) {
+                const width = this.textures.get(asset_name).getSourceImage().width
+                const height = this.textures.get(asset_name).getSourceImage().height
+                const w_size = width * scale
+                const w_half = w_size / 2
+                const h_size = height * scale
+                const h_half = h_size / 2
+                return [w_size, w_half, h_size, h_half]
+            }
+            addAsset(x, y, asset_name, scale, w_half, h_half) {
+                const tile = this.add.image(w_half + tile_size * x, h_half + tile_size * y, asset_name);
+                tile.setScale(scale);
+
+            }
+
+            update() {
+                if (!last_update_received) return;
+
+                const new_state = last_update_received;
+
+                for (const x in new_state.plants) {
+                    for (const y in new_state.plants[x]) {
+                        this.addPlant(x, y, new_state.plants[x][y].type, 2)
+                    }
                 }
             }
-
-        }
-        function getAssetSize(asset_name, scale) {
-            const width = self.textures.get(asset_name).getSourceImage().width
-            const height = self.textures.get(asset_name).getSourceImage().height
-            const w_size = width * scale
-            const w_half = w_size / 2
-            const h_size = height * scale
-            const h_half = h_size / 2
-            return [w_size, w_half, h_size, h_half]
-        }
-        function addAsset(x, y, asset_name, scale, w_half, h_half) {
-            const tile = self.add.image(w_half + tile_size * x, h_half + tile_size * y, asset_name);
-            tile.setScale(scale);
-
         }
 
-        function updateState() {
-            if (!last_update_received) return;
+    socket.on('updateState', function (obj) {
+        last_update_received = obj;
+    });
 
-            new_state = last_update_received;
+    const config = {
+        type: Phaser.AUTO,
+        width: screen_width,
+        height: screen_height,
+        scene: [WelcomeScene,GameScene]
+    };
 
-            for (x in new_state.plants) {
-                for (y in new_state.plants[x]) {
-                    addPlant(x, y, new_state.plants[x][y].type, 2)
-                }
-            }
-            for (i in new_state.players) {
-                addPlant(new_state.players[i].pos_x, new_state.players[i].pos_y, "player", 3)
-            }
-        }
+    var game = new Phaser.Game(config);
+    var self;
 
-        socket.on('updateState', function (obj) {
-            last_update_received = obj;
-        });
+    // function preload() { }
+    // function create() {
+    //     game.scene.add('WelcomeScene', WelcomeScene, true);
+    //     game.scene.add('GameScene', GameScene, true);
+    //     game.scene.start('WelcomeScene');
+    // }
+    // function updateState() { }
+
 
     </script>
 
