@@ -17,8 +17,9 @@
         const tile_scale = 0.065;
         const gameStarted = false;
         let last_update_received = {};
-
+        let player_count = 0;
         class WelcomeScene extends Phaser.Scene {
+            
             constructor() {
                 super({ key: 'WelcomeScene' });
             }
@@ -27,13 +28,23 @@
             }
 
             create() {
-                const welcomeText = this.add.text(200, 200, 'Click here to start!', { fontSize: '32px', fill: '#fff' });
+                this.welcomeText = this.add.text(200, 200, 'Click here to start!', { fontSize: '32px', fill: '#fff' });
+                this.playerText = this.add.text(200, 300, 'Players:', { fontSize: '32px', fill: '#fff' });
+                this.numberText = this.add.text(200, 400, String(player_count), { fontSize: '32px', fill: '#fff' });
+                
 
-                welcomeText.setInteractive();
-
-                welcomeText.on('pointerdown', () => {
-                    game.scene.start('GameScene');
-                });
+                this.welcomeText.setInteractive();
+                
+            }    
+            update(){
+                this.numberText.setText(String(player_count));
+                
+                if (player_count>=2){
+                    this.welcomeText.on('pointerdown', () => {
+                    game.scene.start('GameScene');})
+                }
+                
+            
             }
         }
 
@@ -111,7 +122,9 @@
     socket.on('updateState', function (obj) {
         last_update_received = obj;
     });
-
+    socket.on('playerCount', function (obj){
+        player_count = obj;
+    })
     const config = {
         type: Phaser.AUTO,
         width: screen_width,
