@@ -102,7 +102,7 @@ class GameScene extends Phaser.Scene {
 		const tile = this.add.sprite(w_half + tile_size * x, h_half + tile_size * y, asset_name);
 		tile.setScale(scale);
 		tile.setInteractive();
-    tile.on('pointerdown', function (pointer){
+		tile.on('pointerdown', function (pointer){
 			socket.emit('add_action', {type: 'kill', pos_x: x, pos_y: y});
 		});
 		return tile
@@ -126,10 +126,10 @@ class GameScene extends Phaser.Scene {
 			}
 		}
 		for (const i in new_state.players){
-      if(new_state.players[i].alive && new_state.players[i].role != 'hunter') {
-			  let player = this.addPlant(new_state.players[i].pos_x,new_state.players[i].pos_y,"player",3)
-        current_sprites.push(player)
-      }
+			if(new_state.players[i].alive && new_state.players[i].role != 'hunter') {
+				let player = this.addPlant(new_state.players[i].pos_x,new_state.players[i].pos_y,"player",3)
+				current_sprites.push(player)
+			}	
 		}
 	}
 }
