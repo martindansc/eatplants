@@ -14,7 +14,7 @@ app.use(express.static('public'));
 
 io.on('connection', (socket) => {
 
-  game.addPlayer(socket.id)
+  game.addPlayer(socket.id);
   socket.on('add_action', (obj) => {
     game.addAction(socket.id, obj);
   });
