@@ -5,26 +5,23 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 const port = 8000;
+const { Game } = require("./lib/game");
+const { startLoop } = require("./lib/loop");
 
 app.use(express.static('public'));
 
 io.on('connection', (socket) => {
-  console.log('a user connected');
-});
 
-io.on('connection', (socket) => {
-  console.log('a user connected');
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
+  socket.on('move_bug', (msg) => {
+    
   });
-});
 
-io.on('connection', (socket) => {
-  socket.on('chat message', (msg) => {
-    io.emit('chat message', msg);
-  });
 });
 
 server.listen(port, () => {
-  console.log(`App listening on port ${port}`)
+  console.log(`App listening on port ${port}`);
+
+  const game = new Game();
+  startLoop(game);
+
 });
