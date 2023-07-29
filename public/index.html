@@ -103,7 +103,29 @@
             last_update_received = obj;
         });
 
-        socket.emit("add_action", {type: "moveBug", direction: "down"});
+        window.addEventListener('keydown', function (e) {
+            let direction = "none";
+            if(e.key == "w") {
+                direction = "up";
+            }
+            else if(e.key == "s") {
+                direction = "down";
+            }
+            else if(e.key == "a") {
+                direction = "left";
+            }
+            else if (e.key == "d") {
+                direction = "right";
+            }
+            else {
+                console.log(e.key);
+                return;
+            }
+
+            socket.emit("add_action", {type: "moveBug", direction});
+
+        }, false);
+
 
     </script>
 
