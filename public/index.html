@@ -16,9 +16,12 @@ const screen_height = 640;
 const tile_size = 16;
 const tile_scale = 0.065;
 const gameStarted = false;
-let last_update_received = {};
 
+let current_sprites = [];
+let last_update_received = {};
+let player_count = 0;
 class WelcomeScene extends Phaser.Scene {
+
 	constructor() {
 		super({ key: 'WelcomeScene' });
 	}
@@ -27,13 +30,23 @@ class WelcomeScene extends Phaser.Scene {
 	}
 
 	create() {
-		const welcomeText = this.add.text(200, 200, 'Click here to start!', { fontSize: '32px', fill: '#fff' });
+		this.welcomeText = this.add.text(200, 200, 'Click here to start!', { fontSize: '32px', fill: '#fff' });
+		this.playerText = this.add.text(200, 300, 'Players:', { fontSize: '32px', fill: '#fff' });
+		this.numberText = this.add.text(200, 400, String(player_count), { fontSize: '32px', fill: '#fff' });
 
-		welcomeText.setInteractive();
 
-		welcomeText.on('pointerdown', () => {
-			game.scene.start('GameScene');
-		});
+		this.welcomeText.setInteractive();
+
+	}    
+	update(){
+		this.numberText.setText(String(player_count));
+
+		if (player_count>=2){
+			this.welcomeText.on('pointerdown', () => {
+				game.scene.start('GameScene');})
+		}
+
+
 	}
 }
 
@@ -48,7 +61,7 @@ class GameScene extends Phaser.Scene {
 		this.load.image('plant1', 'assets/plants/shadow/1.png')
 		this.load.image('plant2', 'assets/plants/shadow/2.png')
 		this.load.image('plant3', 'assets/plants/shadow/3.png')
-		this.load.image('bug1','assets/plants/shadow/45.png')
+		this.load.image('player','assets/plants/shadow/45.png')
 
 	}
 
@@ -63,8 +76,7 @@ class GameScene extends Phaser.Scene {
 	addPlant(x, y, asset_name, number_tiles) {
 		const scale = this.getPlantScale(number_tiles)
 		const [w_size, w_half, h_size, h_half] = this.getAssetSize(asset_name, scale);
-		this.addAsset(x, y, asset_name, scale, w_half, h_half)
-
+		return this.addAsset(x, y, asset_name, scale, w_half, h_half)
 	}
 	addBackground(scale) {
 		const asset_name = 'tiles';
@@ -87,29 +99,37 @@ class GameScene extends Phaser.Scene {
 		return [w_size, w_half, h_size, h_half]
 	}
 	addAsset(x, y, asset_name, scale, w_half, h_half) {
-		const tile = this.add.sprite(w_half + tile_size * x, h_half + tile_size * y, asset_name)
-		tile.setInteractive();
+		const tile = this.add.sprite(w_half + tile_size * x, h_half + tile_size * y, asset_name);
 		tile.setScale(scale);
-		tile.on('pointerdown', function (pointer){
+		tile.setInteractive();
+    tile.on('pointerdown', function (pointer){
 			socket.emit('add_action', {type: 'kill', pos_x: x, pos_y: y});
 		});
+		return tile
 	}
-
+	clearMap() {
+		for (const key in current_sprites) {
+			current_sprites[key].destroy();
+		}	
+	}
 	update() {
 		if (!last_update_received) return;
+
+		this.clearMap();
 
 		const new_state = last_update_received;
 
 		for (const x in new_state.plants) {
 			for (const y in new_state.plants[x]) {
-				this.addPlant(x, y, new_state.plants[x][y].type, 2)
+				let plant = this.addPlant(x, y, new_state.plants[x][y].type, 2)
+				current_sprites.push(plant)
 			}
 		}
-		
 		for (const i in new_state.players){
-			if(new_state.players[i].alive && new_state.players[i].role != 'hunter') {
-				this.addPlant(new_state.players[i].pos_x,new_state.players[i].pos_y,"bug1",3);
-			}
+      if(new_state.players[i].alive && new_state.players[i].role != 'hunter') {
+			  let player = this.addPlant(new_state.players[i].pos_x,new_state.players[i].pos_y,"player",3)
+        current_sprites.push(player)
+      }
 		}
 	}
 }
@@ -117,6 +137,10 @@ class GameScene extends Phaser.Scene {
 socket.on('updateState', function (obj) {
 	last_update_received = obj;
 });
+
+socket.on('playerCount', function (obj){
+	player_count = obj;
+})
 
 const config = {
 	type: Phaser.AUTO,

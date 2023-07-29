@@ -15,6 +15,8 @@ app.use(express.static('public'));
 io.on('connection', (socket) => {
 
   game.addPlayer(socket.id);
+  io.emit("playerCount", Object.keys(game.players).length);
+
   socket.on('add_action', (obj) => {
     game.addAction(socket.id, obj);
   });
