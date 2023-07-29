@@ -16,6 +16,7 @@ io.on('connection', (socket) => {
 
   if(game.player_counter == 0) {
     game.init();
+    game.startGame();
   }
 
   game.addPlayer(socket.id);
@@ -35,7 +36,4 @@ server.listen(port, () => {
   console.log(`App listening on port ${port}`);
 
   startLoop(game, io);
-
-  game.startGame();
-
 });
