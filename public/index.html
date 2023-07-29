@@ -3,6 +3,8 @@
 
 <head>
     <script src="/external/phaser.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+
 </head>
 
 <body>
@@ -34,16 +36,16 @@
             this.load.image('plant3','assets/plants/shadow/3.png')
 
         }
+
         function getPlantScale(number_squares){
             return tile_scale*number_squares
         }
+        
         function create() {
             addBackground(tile_scale);
             addPlant(5,5,'plant1',5)
             addPlant(15,25,'plant2',4)
             addPlant(7,15,'plant3',10)
-
-
         }
 
         function addPlant(x,y,asset_name,number_tiles){
@@ -77,6 +79,15 @@
             tile.setScale(scale);
 
         }
+
+        function updateState(new_state) {
+
+        }
+
+        socket.on('updateState', function(obj) {
+            console.log(obj);
+        });
+
     </script>
 
 </body>

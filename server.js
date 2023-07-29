@@ -22,7 +22,7 @@ server.listen(port, () => {
   console.log(`App listening on port ${port}`);
 
   const game = new Game();
-  startLoop(game);
+  startLoop(game, io);
 
   game.startGame();
 
