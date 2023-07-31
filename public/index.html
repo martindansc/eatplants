@@ -174,8 +174,30 @@ window.addEventListener('keydown', function (e) {
 }, false);
 
 
-		</script>
+    </script>
+    <script>
+        const socket2 = io();
+        socket2.on('updateState', function (obj) {
+            board = document.getElementById("board")
+            setTimeout(() => {
+                while (board.firstChild) {
+                    board.removeChild(board.firstChild);
+                }
+                for (let player in obj.players) {
+                    let p = document.createElement("p")
+                    board.appendChild(p)
+                    p.innerHTML = obj.players[player].id+":"+parseInt(obj.players[player].score)
+                }
+            }, "100");
 
-	</body>
+
+        });
+    </script>
+    <div>
+        <p> Score Board: </p>
+        <div id="board">
+        </div>
+    </div>
+</body>
 
 </html>
